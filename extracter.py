@@ -43,7 +43,7 @@ def findCorners(im):
     cv.imshow('ext', ext_contours)
 
     # Sort the contours by area, descending order
-    contours = sorted(ext_contours, key=cv2.contourArea, reverse=True)
+    contours = sorted(ext, key=cv.contourArea, reverse=True)
     # First one is the largest
     polygon = contours[0]  
 
@@ -62,7 +62,7 @@ def findCorners(im):
 
     # Return an array of all 4 points using the indices
 	# Each point is in its own array of one coordinate
-    return [polygon[top_left][0], polygon[top_right][0], polygon[bottom_right][0], polygon[bottom_left][0]]
+    return [tuple(polygon[top_left][0]), tuple(polygon[top_right][0]), tuple(polygon[bottom_right][0]), tuple(polygon[bottom_left][0])]
 
 def main():
     # Load image
@@ -70,6 +70,12 @@ def main():
     cv.imshow('original', im)
     pre_processed = preProcess(im)
     corners = findCorners(pre_processed)
+    for corner in corners:
+        print(corner)
+        cv.circle(im, corner, 3, (0,0,255), -1)
+    cv.imshow('Corners', im)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
 if __name__ == '__main__':
     main()
