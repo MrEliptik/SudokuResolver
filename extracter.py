@@ -18,7 +18,7 @@ def preProcess(im):
 
     # Adaptive threshold    - THRESH_BINARY_INV to inverse color
     #                       - Use 3 as blockSize because noise points are small
-    adaptive_thresh = cv.adaptiveThreshold(blurred,255,cv.ADAPTIVE_THRESH_MEAN_C,\
+    adaptive_thresh = cv.adaptiveThreshold(blurred, 255, cv.ADAPTIVE_THRESH_MEAN_C,\
                                             cv.THRESH_BINARY_INV, 3, 2)
     #cv.imshow('adaptive tresh', adaptive_thresh)
 
@@ -100,6 +100,113 @@ def grid(im, size=9):
             squares.append((p1, p2))
     return squares
 
+def extractCells(im, squares):
+    cells = []
+    for i, square in enumerate(squares):
+        cell = im[square[0][1]:square[1][1], square[0][0]:square[1][0]]
+        cells.append(cell)
+    return cells
+
+def findLargestConnectedComponent(inp_img, scan_tl=None, scan_br=None):
+    im = inp_img.copy()  # Copy the image, leaving the original untouched
+    height, width = im.shape[:2]
+
+    max_area = 0
+    seed_point = (None, None)
+
+    if scan_tl is None:
+        scan_tl = [0, 0]
+
+    if scan_br is None:
+        scan_br = [width, height]
+
+    # Loop through the image
+    for x in range(scan_tl[0], scan_br[0]):
+        for y in range(scan_tl[1], scan_br[1]):
+            # Only operate on light or white squares
+            # Note that .item() appears to take input as y, x
+            if(im.item(y, x) == 255 and x < width and y < height):  
+                area = cv.floodFill(im, None, (x, y), 64)
+                if(area[0] > max_area):  # Gets the maximum bound area which should be the grid
+                    max_area = area[0]
+                    seed_point = (x, y)
+
+    # Colour everything grey (compensates for features outside of our middle scanning range
+    for x in range(width):
+        for y in range(height):
+            if im.item(y, x) == 255 and x < width and y < height:
+                cv.floodFill(im, None, (x, y), 64)
+
+    mask = np.zeros((height + 2, width + 2), np.uint8)  # Mask that is 2 pixels bigger than the image
+
+    # Highlight the main feature
+    if all([p is not None for p in seed_point]):
+        cv.floodFill(im, mask, seed_point, 255)
+
+    top, bottom, left, right = height, 0, width, 0
+
+    for x in range(width):
+        for y in range(height):
+            if im.item(y, x) == 64:  # Hide anything that isn't the main feature
+                cv.floodFill(im, mask, (x, y), 0)
+
+            # Find the bounding parameters
+            if im.item(y, x) == 255:
+                top = y if y < top else top
+                bottom = y if y > bottom else bottom
+                left = x if x < left else left
+                right = x if x > right else right
+
+    bbox = [[left, top], [right, bottom]]
+    return im, np.array(bbox, dtype='float32'), seed_point
+
+def extractDigit(cell, bbox, size):
+    cell = cell[int(bbox[0][1]):int(bbox[1][1]), int(bbox[0][0]):int(bbox[1][0])]
+
+    # Scale and pad the digit so that it fits a square of the digit size we're using for machine learning
+    w = bbox[1][0] - bbox[0][0]
+    h = bbox[1][1] - bbox[0][1]
+
+    # Ignore any small bounding boxes
+    if w > 0 and h > 0 and (w * h) > 100 and len(cell) > 0:
+        return scale_and_centre(cell, size, 4)
+    else:
+        return np.zeros((size, size), np.uint8)
+
+def scale_and_centre(img, size, margin=0, background=0):
+	"""Scales and centres an image onto a new background square."""
+	h, w = img.shape[:2]
+
+	def centre_pad(length):
+		"""Handles centering for a given length that may be odd or even."""
+		if length % 2 == 0:
+			side1 = int((size - length) / 2)
+			side2 = side1
+		else:
+			side1 = int((size - length) / 2)
+			side2 = side1 + 1
+		return side1, side2
+
+	def scale(r, x):
+		return int(r * x)
+
+	if h > w:
+		t_pad = int(margin / 2)
+		b_pad = t_pad
+		ratio = (size - margin) / h
+		w, h = scale(ratio, w), scale(ratio, h)
+		l_pad, r_pad = centre_pad(w)
+	else:
+		l_pad = int(margin / 2)
+		r_pad = l_pad
+		ratio = (size - margin) / w
+		w, h = scale(ratio, w), scale(ratio, h)
+		t_pad, b_pad = centre_pad(h)
+
+	img = cv.resize(img, (w, h))
+	img = cv.copyMakeBorder(img, t_pad, b_pad, l_pad, r_pad, cv.BORDER_CONSTANT, None, background)
+	return cv.resize(img, (size, size))
+
 def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
@@ -119,7 +226,7 @@ def main():
     #cv.imshow('Corners', im_corners)
 
     # Fix the perspective based on the 4 corners found
-    sudoku = fixPerspective(im, corners)
+    sudoku = fixPerspective(pre_processed, corners)
     cv.imshow('Cropped and fixed', sudoku)
 
     # Match a grid to the image
@@ -128,11 +235,23 @@ def main():
     # Convert to int
     squares_int = [[tuple(int(x) for x in tup) for tup in square] for square in squares]
 
-    im_squares = sudoku.copy()
+    im_squares = cv.cvtColor(sudoku.copy(), cv.COLOR_GRAY2RGB)
     # Draw squares
     for square in squares_int:
         cv.rectangle(im_squares,square[0],square[1],(0,255,0),1)
     cv.imshow('Grid applied', im_squares)
+
+    cells = extractCells(sudoku, squares_int)
+
+    extractedCells = []
+    for cell in cells:
+        h, w = cell.shape[:2]
+        margin = int(np.mean([h, w]) / 2.5)
+        _, bbox, seed = findLargestConnectedComponent(cell, [margin, margin], [w - margin, h - margin])
+        extractedCells.append(extractDigit(cell, bbox, 28))
+
+    for i, cell in enumerate(extractedCells):
+        cv.imshow("Cell " + str(i), cell)
     
     cv.waitKey(0)  
     cv.destroyAllWindows()
