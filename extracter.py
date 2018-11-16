@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import imutils
 import operator
+import math
 
 def preProcess(im):
     # Convert to grayscale
@@ -64,6 +65,32 @@ def findCorners(im):
 	# Each point is in its own array of one coordinate
     return [tuple(polygon[top_left][0]), tuple(polygon[top_right][0]), tuple(polygon[bottom_right][0]), tuple(polygon[bottom_left][0])]
 
+def fixPerspective(im, corners):
+    # Explicitly set the data type to float32 or 
+    # `getPerspectiveTransform` will throw an error
+	src = np.array([corners[0], corners[1], corners[2], corners[3]], dtype='float32')
+
+    # Get the longest side in the rectangle
+	side = max([
+            distance(corners[2], corners[1]),
+            distance(corners[0], corners[3]),
+            distance(corners[2], corners[3]),
+            distance(corners[0], corners[1])
+	    ])
+    # Describe a square with side of the calculated length, 
+    # this is the new perspective we want to warp to
+	dst = np.array([[0, 0], [side - 1, 0], [side - 1, side - 1], [0, side - 1]], dtype='float32') 
+
+    # Gets the transformation matrix for skewing the image to 
+    # fit a square by comparing the 4 before and after points
+	m = cv.getPerspectiveTransform(src, dst)
+
+    # Performs the transformation on the original image
+	return cv.warpPerspective(im, m, (int(side), int(side)))
+
+def distance(p0, p1):
+    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
+
 def main():
     # Load image
     im = cv.imread('sudoku_photo.jfif')
@@ -74,8 +101,12 @@ def main():
         print(corner)
         cv.circle(im, corner, 3, (0,0,255), -1)
     cv.imshow('Corners', im)
+
+    sudoku = fixPerspective(im, corners)
+    cv.imshow('Cropped and fixed', sudoku)
     cv.waitKey(0)
     cv.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main()
