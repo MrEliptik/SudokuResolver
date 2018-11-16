@@ -10,7 +10,7 @@ def preProcess(im):
 
     # Light blur to reduce noise before thresholding
     blurred = cv.GaussianBlur(imgray, (5, 5), 0)
-    cv.imshow('blurred', blurred)
+    #cv.imshow('blurred', blurred)
 
     # Binary threshold (poor results)
     #ret, thresh = cv.threshold(blurred, 127, 255, 0)
@@ -20,17 +20,17 @@ def preProcess(im):
     #                       - Use 3 as blockSize because noise points are small
     adaptive_thresh = cv.adaptiveThreshold(blurred,255,cv.ADAPTIVE_THRESH_MEAN_C,\
                                             cv.THRESH_BINARY_INV, 3, 2)
-    cv.imshow('adaptive tresh', adaptive_thresh)
+    #cv.imshow('adaptive tresh', adaptive_thresh)
 
     # Create a cross kernel
     kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
 
     # Dilate to connect the grid correctly
     dilated = cv.dilate(adaptive_thresh, kernel, iterations = 1)
-    cv.imshow('dilated', dilated)
+    #cv.imshow('dilated', dilated)
 
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    #cv.waitKey(0)
+    #cv.destroyAllWindows()
 
     return dilated
     
@@ -41,7 +41,7 @@ def findCorners(im):
     # Put back the image in color to display contours
     im = cv.cvtColor(im, cv.COLOR_GRAY2RGB)
     ext_contours = cv.drawContours(im, ext, -1, (0,0,255), 2)
-    cv.imshow('ext', ext_contours)
+    #cv.imshow('ext', ext_contours)
 
     # Sort the contours by area, descending order
     contours = sorted(ext, key=cv.contourArea, reverse=True)
@@ -58,8 +58,8 @@ def findCorners(im):
     bottom_left, _  = min(enumerate([pt[0][0] - pt[0][1] for pt in polygon]), key=operator.itemgetter(1))
     top_right, _    = max(enumerate([pt[0][0] - pt[0][1] for pt in polygon]), key=operator.itemgetter(1))
 
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    #cv.waitKey(0)
+    #cv.destroyAllWindows()
 
     # Return an array of all 4 points using the indices
 	# Each point is in its own array of one coordinate
@@ -88,6 +88,18 @@ def fixPerspective(im, corners):
     # Performs the transformation on the original image
 	return cv.warpPerspective(im, m, (int(side), int(side)))
 
+def grid(im, size=9):
+    squares = []
+    side = im.shape[:1][0]
+    print(side)
+    side = side / size
+    for i in range(9):
+        for j in range(9):
+            p1 = (i * side, j * side)  # Top left corner of a bounding box
+            p2 = ((i + 1) * side, (j + 1) * side)  # Bottom right corner of bounding box
+            squares.append((p1, p2))
+    return squares
+
 def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
@@ -95,16 +107,34 @@ def main():
     # Load image
     im = cv.imread('sudoku_photo.jfif')
     cv.imshow('original', im)
-    pre_processed = preProcess(im)
-    corners = findCorners(pre_processed)
-    for corner in corners:
-        print(corner)
-        cv.circle(im, corner, 3, (0,0,255), -1)
-    cv.imshow('Corners', im)
 
+    # Pre process (remove noise, treshold image, get contours)
+    pre_processed = preProcess(im)
+
+    # Find corners based on the biggest contour
+    corners = findCorners(pre_processed)
+    im_corners = im.copy()
+    for corner in corners:
+        cv.circle(im_corners, corner, 3, (0,0,255), -1)
+    #cv.imshow('Corners', im_corners)
+
+    # Fix the perspective based on the 4 corners found
     sudoku = fixPerspective(im, corners)
     cv.imshow('Cropped and fixed', sudoku)
-    cv.waitKey(0)
+
+    # Match a grid to the image
+    squares = grid(sudoku)
+
+    # Convert to int
+    squares_int = [[tuple(int(x) for x in tup) for tup in square] for square in squares]
+
+    im_squares = sudoku.copy()
+    # Draw squares
+    for square in squares_int:
+        cv.rectangle(im_squares,square[0],square[1],(0,255,0),1)
+    cv.imshow('Grid applied', im_squares)
+    
+    cv.waitKey(0)  
     cv.destroyAllWindows()
 
 
