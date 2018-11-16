@@ -249,10 +249,19 @@ def main():
         margin = int(np.mean([h, w]) / 2.5)
         _, bbox, seed = findLargestConnectedComponent(cell, [margin, margin], [w - margin, h - margin])
         extractedCells.append(extractDigit(cell, bbox, 28))
-
+    '''
     for i, cell in enumerate(extractedCells):
         cv.imshow("Cell " + str(i), cell)
-    
+    '''
+
+    columns = []
+    with_border = [cv.copyMakeBorder(img.copy(), 1, 1, 1, 1, cv.BORDER_CONSTANT, None, 255) for img in extractedCells]
+    for i in range(9):
+        column = np.concatenate(with_border[i * 9:((i + 1) * 9)], axis=0)
+        columns.append(column)
+    res = np.concatenate(columns, axis=1)
+
+    cv.imshow("Res", res)
     cv.waitKey(0)  
     cv.destroyAllWindows()
 
