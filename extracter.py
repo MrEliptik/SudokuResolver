@@ -266,31 +266,39 @@ def main():
     # Create model and train it
     svm = digits.SVM()
     svm.train()
+
+    sudoku_matrix = np.empty(shape=(1,81))
+    print(sudoku_matrix)
+
     for i, cell in enumerate(extractedCells):
         # Resize image to 64
         if(cell.shape[0] != 64 or cell.shape[1] != 64):
             # Resize image
             dim = (8, 8)
             res = cv.resize(cell.copy(), dim, interpolation = cv.INTER_AREA)
+            #print(res)
             # Erode
             # Create a cross kernel
-            #kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
-            #eroded = cv.erode(res, kernel, iterations = 1)
-            # Invert b&w
-            imagem = cv.bitwise_not(res)
+            kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
+            res = cv.erode(res, kernel, iterations = 1)
             
-            # Image reshap to be flattenned in shape (1, 64)
-            imagem = imagem.astype(dtype="float64")
-            imagem *= 16.0/float(imagem.max())
-            
-            # TODO, try to inverse black and white, compared to
-            # image from dataset, white is 0  and black is 16
-            print(imagem)
-            flat = imagem.reshape((1, imagem.shape[0]*imagem.shape[1]))
-            print(flat.shape)
-            #cv.imshow(str(i), imagem)
-            print(svm.guess(flat))
+            # Convert to float values between 0. and 16.
+            res = res.astype(dtype="float64")
+            if(res.max() != 0.):
+                res *= 16.0/float(res.max())
 
+            # Image reshaped to be flattenned in shape (1, 64)
+            flat = res.reshape((1, res.shape[0]*res.shape[1]))
+
+            # TODO : check non zero before perfoming all the operation
+            # to reduce computing time
+            if(np.count_nonzero(flat) != 0):
+                nb = svm.guess(flat)
+                sudoku_matrix[0][i] = nb
+            else:
+                sudoku_matrix[0][i] = -1 
+    sudoku_matrix = sudoku_matrix.reshape((9, 9))
+    print(sudoku_matrix.T)
     cv.waitKey(0)  
     cv.destroyAllWindows()
 
