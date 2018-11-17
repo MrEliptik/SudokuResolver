@@ -3,6 +3,7 @@ import numpy as np
 import imutils
 import operator
 import math
+import digits
 
 def preProcess(im):
     # Convert to grayscale
@@ -91,7 +92,6 @@ def fixPerspective(im, corners):
 def grid(im, size=9):
     squares = []
     side = im.shape[:1][0]
-    print(side)
     side = side / size
     for i in range(9):
         for j in range(9):
@@ -262,6 +262,35 @@ def main():
     res = np.concatenate(columns, axis=1)
 
     cv.imshow("Res", res)
+
+    # Create model and train it
+    svm = digits.SVM()
+    svm.train()
+    for i, cell in enumerate(extractedCells):
+        # Resize image to 64
+        if(cell.shape[0] != 64 or cell.shape[1] != 64):
+            # Resize image
+            dim = (8, 8)
+            res = cv.resize(cell.copy(), dim, interpolation = cv.INTER_AREA)
+            # Erode
+            # Create a cross kernel
+            #kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
+            #eroded = cv.erode(res, kernel, iterations = 1)
+            # Invert b&w
+            imagem = cv.bitwise_not(res)
+            
+            # Image reshap to be flattenned in shape (1, 64)
+            imagem = imagem.astype(dtype="float64")
+            imagem *= 16.0/float(imagem.max())
+            
+            # TODO, try to inverse black and white, compared to
+            # image from dataset, white is 0  and black is 16
+            print(imagem)
+            flat = imagem.reshape((1, imagem.shape[0]*imagem.shape[1]))
+            print(flat.shape)
+            #cv.imshow(str(i), imagem)
+            print(svm.guess(flat))
+
     cv.waitKey(0)  
     cv.destroyAllWindows()
 
