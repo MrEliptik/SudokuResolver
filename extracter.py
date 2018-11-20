@@ -261,38 +261,40 @@ def main():
     cv.imshow("Res", res)
 
     # Load trained model
-    model = load_model('cnn/mnist_keras_cnn_model.h5')
+    #model = load_model('cnn/mnist_keras_cnn_model.h5')
+    model = load_model('cnn/custom_keras_cnn_model.h5')
 
-    sudoku_matrix = np.empty(shape=(1,81))
+    #sudoku_matrix = np.zeros(shape=(1,81))
+    sudoku_matrix = np.full((1,81), -2)
 
     for i, cell in enumerate(extractedCells):
         if(np.allclose(cell, 0)):
-            print(0)
+            #print(0)
             sudoku_matrix[0][i] = -1
         else:
-            # Resize image
-            dim = (28, 28)
-            res = cv.resize(cell.copy(), dim, interpolation = cv.INTER_AREA)
-
-            res = np.reshape(res, (1, 28, 28, 1))
-            #print(res)
             # Erode
             # Create a cross kernel
-            #kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
-            #res = cv.erode(res, kernel, iterations = 1)
-            
-            # Convert to float values between 0. and 16.
-            res = res.astype(dtype="float32")
-            if(res.max() != 0.):
-                res *= 255.0/float(res.max())
+            kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
+            res = cv.erode(cell.copy(), kernel, iterations = 1)
+            res = cv.bitwise_not(res)
+            #cv.imshow("cell" + str(i), res)
+            # Resize image
+            dim = (28, 28)
+            res = cv.resize(res, dim, interpolation = cv.INTER_AREA)
 
+            res = np.reshape(res, (1, 28, 28, 1))
+            
+            # Convert to float values between 0. and 1.
+            res = res.astype(dtype="float32")    
+            if(res.max() != 0.):
+                res /= 255
             nb = model.predict(res)
             print(nb)
             for j in range(nb.shape[0]):
                 for k in range(nb.shape[1]):
-                    if(nb[j][k] == 1):
-                        sudoku_matrix[0][i] = k
-                        print(k)
+                    if(nb[j][k] > 0.9):
+                        sudoku_matrix[0][i] = int(k)
+                        #print(k)
                        
     sudoku_matrix = sudoku_matrix.reshape((9, 9))
     print(sudoku_matrix.T)
