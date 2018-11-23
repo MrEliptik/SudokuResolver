@@ -262,7 +262,8 @@ def main():
 
     # Load trained model
     #model = load_model('cnn/mnist_keras_cnn_model.h5')
-    model = load_model('cnn/custom_keras_cnn_model.h5')
+    #model = load_model('cnn/custom_keras_cnn_model.h5')
+    model = load_model('cnn/custom_w_altered_keras_cnn_model.h5')
 
     #sudoku_matrix = np.zeros(shape=(1,81))
     sudoku_matrix = np.full((1,81), -2)
@@ -270,7 +271,7 @@ def main():
     for i, cell in enumerate(extractedCells):
         if(np.allclose(cell, 0)):
             #print(0)
-            sudoku_matrix[0][i] = -1
+            sudoku_matrix[0][i] = 0
         else:
             # Erode
             # Create a cross kernel
