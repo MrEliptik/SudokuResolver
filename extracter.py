@@ -3,7 +3,8 @@ import numpy as np
 import imutils
 import operator
 import math
-import digits
+from keras.models import load_model
+
 
 def preProcess(im):
     # Convert to grayscale
@@ -212,7 +213,7 @@ def distance(p0, p1):
 
 def main():
     # Load image
-    im = cv.imread('sudoku_photo.jfif')
+    im = cv.imread('cnn/sudoku_photo.jfif')
     cv.imshow('original', im)
 
     # Pre process (remove noise, treshold image, get contours)
@@ -249,10 +250,6 @@ def main():
         margin = int(np.mean([h, w]) / 2.5)
         _, bbox, seed = findLargestConnectedComponent(cell, [margin, margin], [w - margin, h - margin])
         extractedCells.append(extractDigit(cell, bbox, 28))
-    '''
-    for i, cell in enumerate(extractedCells):
-        cv.imshow("Cell " + str(i), cell)
-    '''
 
     columns = []
     with_border = [cv.copyMakeBorder(img.copy(), 1, 1, 1, 1, cv.BORDER_CONSTANT, None, 255) for img in extractedCells]
@@ -263,40 +260,43 @@ def main():
 
     cv.imshow("Res", res)
 
-    # Create model and train it
-    svm = digits.SVM()
-    svm.train()
+    # Load trained model
+    #model = load_model('cnn/mnist_keras_cnn_model.h5')
+    #model = load_model('cnn/custom_keras_cnn_model.h5')
+    model = load_model('cnn/custom_w_altered_keras_cnn_model.h5')
 
-    sudoku_matrix = np.empty(shape=(1,81))
-    print(sudoku_matrix)
+    #sudoku_matrix = np.zeros(shape=(1,81))
+    sudoku_matrix = np.full((1,81), -2)
 
     for i, cell in enumerate(extractedCells):
-        # Resize image to 64
-        if(cell.shape[0] != 64 or cell.shape[1] != 64):
-            # Resize image
-            dim = (8, 8)
-            res = cv.resize(cell.copy(), dim, interpolation = cv.INTER_AREA)
-            #print(res)
+        if(np.allclose(cell, 0)):
+            #print(0)
+            sudoku_matrix[0][i] = 0
+        else:
             # Erode
             # Create a cross kernel
             kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
-            res = cv.erode(res, kernel, iterations = 1)
+            res = cv.erode(cell.copy(), kernel, iterations = 1)
+            res = cv.bitwise_not(res)
+            #cv.imshow("cell" + str(i), res)
+            # Resize image
+            dim = (28, 28)
+            res = cv.resize(res, dim, interpolation = cv.INTER_AREA)
+
+            res = np.reshape(res, (1, 28, 28, 1))
             
-            # Convert to float values between 0. and 16.
-            res = res.astype(dtype="float64")
+            # Convert to float values between 0. and 1.
+            res = res.astype(dtype="float32")    
             if(res.max() != 0.):
-                res *= 16.0/float(res.max())
-
-            # Image reshaped to be flattenned in shape (1, 64)
-            flat = res.reshape((1, res.shape[0]*res.shape[1]))
-
-            # TODO : check non zero before perfoming all the operation
-            # to reduce computing time
-            if(np.count_nonzero(flat) != 0):
-                nb = svm.guess(flat)
-                sudoku_matrix[0][i] = nb
-            else:
-                sudoku_matrix[0][i] = -1 
+                res /= 255
+            nb = model.predict(res)
+            print(nb)
+            for j in range(nb.shape[0]):
+                for k in range(nb.shape[1]):
+                    if(nb[j][k] > 0.9):
+                        sudoku_matrix[0][i] = int(k)
+                        #print(k)
+                       
     sudoku_matrix = sudoku_matrix.reshape((9, 9))
     print(sudoku_matrix.T)
     cv.waitKey(0)  
