@@ -12,7 +12,7 @@ A computer vision python program to resolve sudoku taken from a camera
   - *solver.py*         : Algorithm(s) to solve the sudoku
   - *alterateImages.py* : Function(s) to alterate images (crop, skew, rotate)
   - *addBadImages.py*   : Add 150 alterated images to each digit class
-  - *buildDataset.py*   : Is by buildMnist.py to create a dataset in memory
+  - *buildDataset.py*   : Is used by buildMnist.py to create a dataset in memory
   - *buildMnist.py*     : Create, train, test and save a CNN model
 
 # Steps
