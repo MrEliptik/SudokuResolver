@@ -25,3 +25,8 @@ A computer vision python program to resolve sudoku taken from a camera
 ![alt text](https://raw.githubusercontent.com/MrEliptik/SudokuResolver/master/examples/cropped_perspective_fixed.png)
 ![alt text](https://raw.githubusercontent.com/MrEliptik/SudokuResolver/master/examples/grid_applied.png)
 ![alt text](https://raw.githubusercontent.com/MrEliptik/SudokuResolver/master/examples/result.png)
+
+# TODO 
+- Re-train CNN with MNIST data (hand writtten digit) & test perfomance
+- Add a web interface
+- Use an RCNN to localize digits
