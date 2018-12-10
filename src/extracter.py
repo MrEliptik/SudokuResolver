@@ -212,9 +212,9 @@ def readSudoku(cells):
     sudoku_matrix = np.full((1, 81), -1)
 
     # Load trained model
-    #model = load_model('../master/ressources/models/mnist_keras_cnn_model.h5')
-    #model = load_model('../master/ressources/models/custom_keras_cnn_model.h5')
-    model = load_model('../master/ressources/models/custom_w_altered_keras_cnn_model.h5')
+    #model = load_model('ressources/models/mnist_keras_cnn_model.h5')
+    #model = load_model('ressources/models/custom_keras_cnn_model.h5')
+    model = load_model('ressources/models/custom_w_altered_keras_cnn_model.h5')
 
     for i, cell in enumerate(cells):
         if(np.allclose(cell, 0)):
@@ -252,7 +252,7 @@ def distance(p0, p1):
 
 def main():
     # Load image
-    im = cv.imread('../master/ressources/img/sudoku_photo.jfif')
+    im = cv.imread('ressources/img/sudoku_photo.jfif')
     cv.imshow('original', im)
 
     # Pre process (remove noise, treshold image, get contours)

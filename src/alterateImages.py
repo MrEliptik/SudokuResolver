@@ -19,11 +19,3 @@ def random_crop(im):
         res = cv.resize(crop_img, (128, 128), interpolation=cv.INTER_AREA)
     return res
 
-'''
-im = cv.imread('cnn/data/Sample005/img005-01013.png')
-im = random_crop(im)
-
-res = cv.resize(im, (28, 28), interpolation=cv.INTER_AREA)
-cv.imshow("res", res)
-cv.waitKey(0)
-'''

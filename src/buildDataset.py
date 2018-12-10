@@ -16,7 +16,7 @@ def read_data():
     for i in range(nb_classes):
         # Go through the sample of that class
         for j in range(nb_objects_per_class):
-            im = cv.imread('../master/data/Sample' + format(i+1, '03d') 
+            im = cv.imread('data/Sample' + format(i+1, '03d') 
                             + '/img' + format(i+1, '03d') + '-' 
                             + format(j+1, '05d') + '.png')
             imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
