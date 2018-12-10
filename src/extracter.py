@@ -304,10 +304,13 @@ def main():
 
     # Get matrix by using CNN to recognize digits
     sudoku = readSudoku(extractedCells)
+    print("Extracted sudoku :")
+    print(sudoku)
 
     # Resolve sudoku
     resolved = sudoku.copy()
     solver.solveSudoku(resolved)
+    print("Solved sudoku :")
     print(resolved)
 
     cv.waitKey(0)  
