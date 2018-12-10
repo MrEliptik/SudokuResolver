@@ -7,6 +7,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from keras.layers.normalization import BatchNormalization
 import buildDataset as dataset
+import numpy as np
 
 batch_size = 128
 num_classes = 10
@@ -16,8 +17,10 @@ epochs = 10
 img_rows, img_cols = 28, 28
 
 # the data, shuffled and split between train and test sets
-#(x_train, y_train), (x_test, y_test) = mnist.load_data()
-x_train, y_train, x_test, y_test = dataset.load_data()
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+x_train_font, y_train_font, x_test_font, y_test_font = dataset.load_data()
+
 
 if K.image_data_format() == 'channels_first':
     x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
@@ -28,8 +31,13 @@ else:
     x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
     input_shape = (img_rows, img_cols, 1)
 
-#x_train = x_train.astype('float32')
-#x_test = x_test.astype('float32')
+x_train = np.vstack((x_train, x_train_font))
+x_test = np.vstack((x_test, x_test_font))
+y_train = np.concatenate((y_train, y_train_font))
+y_test = np.concatenate((y_test, y_test_font))
+
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
 x_train /= 255
 x_test /= 255
 print('x_train shape:', x_train.shape)
@@ -82,4 +90,4 @@ score = model.evaluate(x_test, y_test, verbose=1)
 
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
-model.save('../ressources/models/custom_w_altered_keras_cnn_model.h5')
+model.save('ressources/models/mnist_fonts_cnn_keras_model.h5')
