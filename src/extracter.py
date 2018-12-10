@@ -212,9 +212,10 @@ def readSudoku(cells):
     sudoku_matrix = np.full((1, 81), -1)
 
     # Load trained model
-    #model = load_model('../master/ressources/models/mnist_keras_cnn_model.h5')
-    #model = load_model('../master/ressources/models/custom_keras_cnn_model.h5')
-    model = load_model('../master/ressources/models/custom_w_altered_keras_cnn_model.h5')
+    #model = load_model('ressources/models/mnist_keras_cnn_model.h5')
+    #model = load_model('ressources/models/custom_keras_cnn_model.h5')
+    #model = load_model('ressources/models/custom_w_altered_keras_cnn_model.h5')
+    model = load_model('ressources/models/mnist_fonts_cnn_keras_model.h5')
 
     for i, cell in enumerate(cells):
         if(np.allclose(cell, 0)):
@@ -304,10 +305,13 @@ def main():
 
     # Get matrix by using CNN to recognize digits
     sudoku = readSudoku(extractedCells)
+    print("Extracted sudoku :")
+    print(sudoku)
 
     # Resolve sudoku
     resolved = sudoku.copy()
     solver.solveSudoku(resolved)
+    print("Solved sudoku :")
     print(resolved)
 
     cv.waitKey(0)  
