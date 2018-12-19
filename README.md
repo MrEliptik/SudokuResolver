@@ -14,6 +14,13 @@ A computer vision python program to resolve sudoku taken from a camera
   - *addBadImages.py*   : Add 150 alterated images to each digit class
   - *buildDataset.py*   : Is used by buildMnist.py to create a dataset in memory
   - *buildMnist.py*     : Create, train, test and save a CNN model
+ 
+# Requirements
+- Keras==2.2.4
+- numpy==1.15.4
+- imutils==0.5.2
+- opencv_python==3.4.3.18
+- scikit_learn==0.20.1
 
 # Steps
 ![alt text](https://raw.githubusercontent.com/MrEliptik/SudokuResolver/master/examples/original.png)
