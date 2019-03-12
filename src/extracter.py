@@ -169,10 +169,9 @@ def extractDigit(cell, bbox, size):
     h = bbox[1][1] - bbox[0][1]
 
     # Ignore any small bounding boxes
-    if w > 0 and h > 0 and (w * h) > 100 and len(cell) > 0:
+    if w > 0 and h > 0 and (w * h) > 100 and cell:
         return scale_and_centre(cell, size, 4)
-    else:
-        return np.zeros((size, size), np.uint8)
+    return np.zeros((size, size), np.uint8)
 
 def scale_and_centre(img, size, margin=0, background=0):
 	"""Scales and centres an image onto a new background square."""
