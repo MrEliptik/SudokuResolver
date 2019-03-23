@@ -7,15 +7,13 @@ currentVersion = '0.1'
 
 @route('/solve', method='POST')
 def solve():
-    category   = request.forms.get('category')
     file     = request.files.get('upload')
     name, ext = os.path.splitext(file.filename)
     if ext not in ('.png','.jpg','.jpeg'):
         return 'File extension not allowed.'
-    
+    print(file.name)
+    resolved = sudoku.solve(file.file)
     return 'OK'
-
-
 
 @route('/version')
 def version():

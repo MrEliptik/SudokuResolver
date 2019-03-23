@@ -1,7 +1,15 @@
 import extracter
 import solver
+import numpy as np
+import cv2
 
 def solve(im):
+    im = cv2.imdecode(np.fromstring(im.read(), np.uint8), 1)
+    cv2.imshow('Pouet', im)
+    cv2.waitKey(0)
+    #image = np.asarray(bytearray(im), dtype="uint8")
+    #im = cv2.imdecode(image, cv2.IMREAD_COLOR)
+
     # Pre process (remove noise, treshold image, get contours)
     pre_processed = extracter.preProcess(im)
 
@@ -38,3 +46,5 @@ def solve(im):
     # Resolve sudoku
     resolved = sudoku.copy()
     solver.solveSudoku(resolved)
+
+    return resolved
