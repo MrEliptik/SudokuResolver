@@ -259,10 +259,13 @@ def main():
 
     # Find corners based on the biggest contour
     corners = findCorners(pre_processed)
+
+    '''
     im_corners = im.copy()
     for corner in corners:
         cv.circle(im_corners, corner, 3, (0,0,255), -1)
-    #cv.imshow('Corners', im_corners)
+    cv.imshow('Corners', im_corners)
+    '''
 
     # Fix the perspective based on the 4 corners found
     sudoku = fixPerspective(pre_processed, corners)
