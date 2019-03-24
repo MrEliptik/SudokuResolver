@@ -1,39 +1,50 @@
 <html>
-  <head>
-    <META HTTP-EQUIV="Access-Control-Allow-Origin" CONTENT="http://127.0.0.1">
-  </head>
+  <head> </head>
 
   <body>
     <form
-      action="http://localhost:8080/solve"
-      method="POST"
       enctype="multipart/form-data"
       norm="form"
-      target="hiddenFrame"
-      id='myForm'
+      id="myForm"
     >
-      Select a file: <input type="file" name="upload" onchange="handleFile(this.file)"/>
+      Select a file:
+      <input
+        id="fileInput"
+        type="file"
+        name="upload"
+        accept="image/png, image/jpeg, image/jpg"
+      />
       <input type="submit" value="Start upload" />
+      <label class="button-upload" onclick="send()">Upload</label>
     </form>
-    <!--<label class="button-upload" onclick="send()">Upload</label>-->
-    <iframe id="frameResp" name="hiddenFrame" width="0" height="0" border="0" style="display: none;" onload="test(this)"></iframe>
+    
   </body>
   <script>
-    var frameResp = document.getElementById('frameResp');
-    var file = null;
+    var _file = null;
 
-    function test(x){
-      console.log(x.contentWindow.document.body.innerHTML);
+    function send() {
+      var file = document.getElementById("fileInput").files[0]
+      console.log(file)
+      var url = "http://localhost:8080/solve";
+
+      // Second request with the files
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      /*
+      xhr.setRequestHeader(
+        "Content-Type",
+        "multipart/form-data; boundary=---------------------------169461201884497922237853436"
+      );
+      */
+      var formData = new FormData();
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          alert(xhr.responseText);
+        }
+      };
+      formData.append("upload", file);
+      xhr.send(formData);
     }
-
-    function handleFile(file){
-        //TODO: check file 
-        this.file = file;
-    }
-
-    frameResp.addEventListener('onLoad', () => {
-      console.log(frameResp);
-    });
-    
   </script>
 </html>
