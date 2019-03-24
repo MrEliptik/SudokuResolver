@@ -1,10 +1,39 @@
 <html>
-    <head></head>
+  <head>
+    <META HTTP-EQUIV="Access-Control-Allow-Origin" CONTENT="http://127.0.0.1">
+  </head>
 
-    <body>
-        <form action="http://localhost:8080/solve" method="post" enctype="multipart/form-data">
-            Select a file: <input type="file" name="upload" />
-            <input type="submit" value="Start upload" />
-          </form>
-    </body>
+  <body>
+    <form
+      action="http://localhost:8080/solve"
+      method="POST"
+      enctype="multipart/form-data"
+      norm="form"
+      target="hiddenFrame"
+      id='myForm'
+    >
+      Select a file: <input type="file" name="upload" onchange="handleFile(this.file)"/>
+      <input type="submit" value="Start upload" />
+    </form>
+    <!--<label class="button-upload" onclick="send()">Upload</label>-->
+    <iframe id="frameResp" name="hiddenFrame" width="0" height="0" border="0" style="display: none;" onload="test(this)"></iframe>
+  </body>
+  <script>
+    var frameResp = document.getElementById('frameResp');
+    var file = null;
+
+    function test(x){
+      console.log(x.contentWindow.document.body.innerHTML);
+    }
+
+    function handleFile(file){
+        //TODO: check file 
+        this.file = file;
+    }
+
+    frameResp.addEventListener('onLoad', () => {
+      console.log(frameResp);
+    });
+    
+  </script>
 </html>

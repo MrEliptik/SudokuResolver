@@ -169,7 +169,7 @@ def extractDigit(cell, bbox, size):
     h = bbox[1][1] - bbox[0][1]
 
     # Ignore any small bounding boxes
-    if w > 0 and h > 0 and (w * h) > 100 and cell:
+    if w > 0 and h > 0 and (w * h) > 100 and cell.size:
         return scale_and_centre(cell, size, 4)
     return np.zeros((size, size), np.uint8)
 
@@ -211,9 +211,9 @@ def readSudoku(cells):
     sudoku_matrix = np.full((1, 81), -1)
 
     # Load trained model
-    #model = load_model('ressources/models/mnist_keras_cnn_model.h5')
-    #model = load_model('ressources/models/custom_keras_cnn_model.h5')
-    model = load_model('ressources/models/custom_w_altered_keras_cnn_model.h5')
+    #model = load_model('../ressources/models/mnist_keras_cnn_model.h5')
+    #model = load_model('../ressources/models/custom_keras_cnn_model.h5')
+    model = load_model('../ressources/models/custom_w_altered_keras_cnn_model.h5')
 
     for i, cell in enumerate(cells):
         if(np.allclose(cell, 0)):

@@ -5,6 +5,10 @@ import sudoku
 
 currentVersion = '0.1'
 
+@route('/')
+def docs():
+    return 'Under construction..'
+
 @route('/solve', method='POST')
 def solve():
     file     = request.files.get('upload')
@@ -13,7 +17,7 @@ def solve():
         return 'File extension not allowed.'
     print(file.name)
     resolved = sudoku.solve(file.file)
-    return 'OK'
+    return str(resolved)
 
 @route('/version')
 def version():
