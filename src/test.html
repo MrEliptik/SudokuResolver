@@ -14,7 +14,6 @@
         name="upload"
         accept="image/png, image/jpeg, image/jpg"
       />
-      <input type="submit" value="Start upload" />
       <label class="button-upload" onclick="send()">Upload</label>
     </form>
     
@@ -30,12 +29,6 @@
       // Second request with the files
       var xhr = new XMLHttpRequest();
       xhr.open("POST", url, true);
-      /*
-      xhr.setRequestHeader(
-        "Content-Type",
-        "multipart/form-data; boundary=---------------------------169461201884497922237853436"
-      );
-      */
       var formData = new FormData();
 
       xhr.onreadystatechange = function() {
