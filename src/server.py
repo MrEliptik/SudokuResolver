@@ -17,8 +17,13 @@ def solve():
     if ext not in ('.png','.jpg','.jpeg'):
         return 'File extension not allowed.'
     print(file.name)
-    resolved = sudoku.solve(file.file)
-    return str(resolved)
+    json_result = sudoku.solve(file.file)
+    '''
+    To read the JSON array:
+    b_new = json.loads(obj_text)
+    a_new = np.array(b_new)
+    '''
+    return json_result
     
 
 @route('/version')

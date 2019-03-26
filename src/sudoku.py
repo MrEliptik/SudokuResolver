@@ -2,6 +2,7 @@ import extracter
 import solver
 import numpy as np
 import cv2 as cv
+import json
 
 def solve(im):
     im = cv.imdecode(np.fromstring(im.read(), np.uint8), 1)
@@ -46,4 +47,10 @@ def solve(im):
     print("Resolved: ")
     print(resolved)
 
-    return resolved
+    # JSONify
+    result = {}
+    result['success'] = True;
+    result['grid'] = resolved.tolist();
+    json_result = json.dumps(result)
+
+    return json_result
