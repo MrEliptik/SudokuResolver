@@ -12,7 +12,6 @@ model = None
 def initiliaze():
     global model
     model = load_model(model_path)
-    print(model)
 
 @route('/')
 def docs():
@@ -30,8 +29,10 @@ def solve():
     b_new = json.loads(obj_text)
     a_new = np.array(b_new)
     '''
-    print(model)
-    return sudoku.solve(model, file.file)
+    try:
+        return sudoku.solve(model, file.file)
+    except expression as identifier:
+        return "Error when trying to read sudoku.."   
     
 
 @route('/version')
