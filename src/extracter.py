@@ -207,13 +207,8 @@ def scale_and_centre(img, size, margin=0, background=0):
 	img = cv.copyMakeBorder(img, t_pad, b_pad, l_pad, r_pad, cv.BORDER_CONSTANT, None, background)
 	return cv.resize(img, (size, size))
 
-def readSudoku(cells):
+def readSudoku(model, cells):
     sudoku_matrix = np.full((1, 81), -1)
-
-    # Load trained model
-    #model = load_model('../ressources/models/mnist_keras_cnn_model.h5')
-    #model = load_model('../ressources/models/custom_keras_cnn_model.h5')
-    model = load_model('../ressources/models/custom_w_altered_keras_cnn_model.h5')
 
     for i, cell in enumerate(cells):
         if(np.allclose(cell, 0)):
@@ -250,8 +245,13 @@ def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
 def main():
+    # Load trained model
+    #model = load_model('../ressources/models/mnist_keras_cnn_model.h5')
+    #model = load_model('../ressources/models/custom_keras_cnn_model.h5')
+    model = load_model('../ressources/models/custom_w_altered_keras_cnn_model.h5')
+
     # Load image
-    im = cv.imread('ressources/img/sudoku_photo.jfif')
+    im = cv.imread('../ressources/img/sudoku_photo.jfif')
     cv.imshow('original', im)
 
     # Pre process (remove noise, treshold image, get contours)
@@ -305,7 +305,7 @@ def main():
     cv.imshow("Res", res)
 
     # Get matrix by using CNN to recognize digits
-    sudoku = readSudoku(extractedCells)
+    sudoku = readSudoku(model, extractedCells)
     print("Extracted sudoku :")
     print(sudoku)
 
