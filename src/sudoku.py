@@ -4,7 +4,10 @@ import numpy as np
 import cv2 as cv
 import json
 
-def solve(im):
+def solve(model, im):
+    success = True
+    error_msg = ""
+
     im = cv.imdecode(np.fromstring(im.read(), np.uint8), 1)
 
     # Pre process (remove noise, treshold image, get contours)
@@ -36,21 +39,24 @@ def solve(im):
         extractedCells.append(extracter.extractDigit(cell, bbox, 28))
 
     # Get matrix by using CNN to recognize digits
-    sudoku = extracter.readSudoku(extractedCells)
+    sudoku = extracter.readSudoku(model, extractedCells)
     print("Extracted sudoku :")
     print(sudoku)
 
     # Resolve sudoku
-    resolved = sudoku.copy()
-    solver.solveSudoku(resolved)
-
-    print("Resolved: ")
-    print(resolved)
+    solved = sudoku.copy()
+    if(not solver.solveSudoku(solved)):
+        success = False
+        error_msg = "Impossible to solve sudoku."
+    else:
+        print("Solved: ")
+        print(solved)
 
     # JSONify
     result = {}
-    result['success'] = True;
-    result['grid'] = resolved.tolist();
+    result['success'] = success;
+    result['error_msg'] = error_msg;
+    result['grid'] = solved.tolist();
     json_result = json.dumps(result)
 
     return json_result
