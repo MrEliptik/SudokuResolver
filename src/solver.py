@@ -3,10 +3,14 @@ def findNextCellToFill(grid, i, j):
         for y in range(j, 9):
             if grid[x][y] == 0:
                     return x, y
+            elif grid[x][y] == -1:
+                return -2, -2
     for x in range(0, 9):
         for y in range(0, 9):
             if grid[x][y] == 0:
                 return x, y
+            elif grid[x][y] == -1:
+                return -2, -2
     return -1, -1
 
 def isValid(grid, i, j, e):
@@ -27,6 +31,8 @@ def solveSudoku(grid, i=0, j=0):
     i,j = findNextCellToFill(grid, i, j)
     if i == -1:
         return True
+    elif i == -2:
+        return False
     for e in range(1,10):
         if isValid(grid,i,j,e):
             grid[i][j] = e
