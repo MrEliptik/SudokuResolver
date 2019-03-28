@@ -23,7 +23,12 @@ def solve():
     file     = request.files.get('upload')
     name, ext = os.path.splitext(file.filename)
     if ext not in ('.png','.jpg','.jpeg'):
-        return 'File extension not allowed.'
+        result = {}
+        result['success'] = False;
+        result['error_msg'] = "File type not supported!";
+        result['grid'] = '';
+        json_result = json.dumps(result)
+        return json_result
     '''
     To read the JSON array:
     b_new = json.loads(obj_text)
