@@ -1,0 +1,43 @@
+<html>
+  <head> </head>
+
+  <body>
+    <form
+      enctype="multipart/form-data"
+      norm="form"
+      id="myForm"
+    >
+      Select a file:
+      <input
+        id="fileInput"
+        type="file"
+        name="upload"
+        accept="image/png, image/jpeg, image/jpg"
+      />
+      <label class="button-upload" onclick="send()">Upload</label>
+    </form>
+    
+  </body>
+  <script>
+    var _file = null;
+
+    function send() {
+      var file = document.getElementById("fileInput").files[0]
+      console.log(file)
+      var url = "http://localhost:8080/solve";
+
+      // Second request with the files
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      var formData = new FormData();
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          alert(xhr.responseText);
+        }
+      };
+      formData.append("upload", file);
+      xhr.send(formData);
+    }
+  </script>
+</html>
