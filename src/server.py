@@ -1,6 +1,6 @@
 import json
 import os
-from bottle import route, run, static_file, request
+from bottle import route, run, static_file, request, response
 import sudoku
 from keras.models import load_model
 
@@ -9,15 +9,30 @@ model_path = '../ressources/models/custom_w_altered_keras_cnn_model.h5'
 # Global variable for the keras model
 model = None
 
+def cors(func):
+    def wrapper(*args, **kwargs):
+        response.set_header("Access-Control-Allow-Origin", "*")
+        response.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        response.set_header("Access-Control-Allow-Headers", "Origin, Content-Type")
+        
+        # skip the function if it is not needed
+        if request.method == 'OPTIONS':
+            return
+
+        return func(*args, **kwargs)
+    return wrapper
+
 def initiliaze():
     global model
     model = load_model(model_path)
 
 @route('/')
+@cors
 def docs():
     return 'Under construction..'
 
 @route('/solve', method='POST')
+@cors
 def solve():
     global model
     file     = request.files.get('upload')
