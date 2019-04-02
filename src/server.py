@@ -61,4 +61,4 @@ def version():
 
 if __name__ == "__main__":
     initiliaze()
-    run(host='localhost', port=8080, debug=True)
+    run(host='localhost', port=9092, debug=True)
