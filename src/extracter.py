@@ -11,8 +11,8 @@ def preProcess(im):
     imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
 
     # Light blur to reduce noise before thresholding
-    blurred = cv.GaussianBlur(imgray, (5, 5), 0)
-    #cv.imshow('blurred', blurred)
+    blurred = cv.GaussianBlur(imgray, (9, 9), 0)
+    cv.imshow('blurred', blurred)
 
     # Binary threshold (poor results)
     #ret, thresh = cv.threshold(blurred, 127, 255, 0)
@@ -22,17 +22,20 @@ def preProcess(im):
     #                       - Use 3 as blockSize because noise points are small
     adaptive_thresh = cv.adaptiveThreshold(blurred, 255, cv.ADAPTIVE_THRESH_MEAN_C,\
                                             cv.THRESH_BINARY_INV, 3, 2)
-    #cv.imshow('adaptive tresh', adaptive_thresh)
+    cv.imshow('adaptive tresh', adaptive_thresh)
 
     # Create a cross kernel
     kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
 
     # Dilate to connect the grid correctly
     dilated = cv.dilate(adaptive_thresh, kernel, iterations = 1)
-    #cv.imshow('dilated', dilated)
 
-    #cv.waitKey(0)
-    #cv.destroyAllWindows()
+    # Erode to connect the grid correctly
+    eroded = cv.erode(dilated, kernel, iterations = 1)
+    cv.imshow('dilated', eroded)
+
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
     return dilated
     
@@ -43,7 +46,7 @@ def findCorners(im):
     # Put back the image in color to display contours
     im = cv.cvtColor(im, cv.COLOR_GRAY2RGB)
     ext_contours = cv.drawContours(im, ext, -1, (0,0,255), 2)
-    #cv.imshow('ext', ext_contours)
+    cv.imshow('ext', ext_contours)
 
     # Sort the contours by area, descending order
     contours = sorted(ext, key=cv.contourArea, reverse=True)
@@ -60,8 +63,8 @@ def findCorners(im):
     bottom_left, _  = min(enumerate([pt[0][0] - pt[0][1] for pt in polygon]), key=operator.itemgetter(1))
     top_right, _    = max(enumerate([pt[0][0] - pt[0][1] for pt in polygon]), key=operator.itemgetter(1))
 
-    #cv.waitKey(0)
-    #cv.destroyAllWindows()
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
     # Return an array of all 4 points using the indices
 	# Each point is in its own array of one coordinate
@@ -170,7 +173,7 @@ def extractDigit(cell, bbox, size):
 
     # Ignore any small bounding boxes
     if w > 0 and h > 0 and (w * h) > 100 and cell.size:
-        return scale_and_centre(cell, size, 4)
+        return scale_and_centre(cell, size, 6)
     return np.zeros((size, size), np.uint8)
 
 def scale_and_centre(img, size, margin=0, background=0):
@@ -251,7 +254,8 @@ def main():
     model = load_model('../ressources/models/custom_w_altered_keras_cnn_model.h5')
 
     # Load image
-    im = cv.imread('../ressources/img/sudoku_photo.jfif')
+    #im = cv.imread('../ressources/img/sudoku_photo.jfif')
+    im = cv.imread('../ressources/img/sudoku2.jpg')
     cv.imshow('original', im)
 
     # Pre process (remove noise, treshold image, get contours)
@@ -260,12 +264,12 @@ def main():
     # Find corners based on the biggest contour
     corners = findCorners(pre_processed)
 
-    '''
+    
     im_corners = im.copy()
     for corner in corners:
         cv.circle(im_corners, corner, 3, (0,0,255), -1)
     cv.imshow('Corners', im_corners)
-    '''
+    
 
     # Fix the perspective based on the 4 corners found
     sudoku = fixPerspective(pre_processed, corners)
@@ -280,7 +284,7 @@ def main():
     im_squares = cv.cvtColor(sudoku.copy(), cv.COLOR_GRAY2RGB)
     # Draw squares
     for square in squares_int:
-        cv.rectangle(im_squares,square[0],square[1],(0,255,0),1)
+        cv.rectangle(im_squares, square[0], square[1], (0,255,0), 1)
     cv.imshow('Grid applied', im_squares)
 
     # Get individual cells 
