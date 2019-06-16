@@ -2,7 +2,9 @@
 
 A computer vision python program to resolve sudoku taken from a camera.
 
-![web interface screenshot](ressources/web.png)
+<p align="center">
+    <img src="ressources/web.png" alt="web itnerface screenshot">
+</p>
 
 SudokuResolver is live! Test it [there](http://projects.victormeunier.com/sudoku/sudoku.html)
 
